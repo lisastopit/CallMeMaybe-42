@@ -13,14 +13,25 @@ class ParameterType(BaseModel):
     @classmethod
     def validate_type(cls, v: str) -> str:
         """Validate that the type is one of the supported types."""
-        allowed = {"number", "string", "boolean", "integer", "array", "object"}
+        allowed = {
+            "number",
+            "string",
+            "boolean",
+            "integer",
+            "array",
+            "object",
+        }
         if v not in allowed:
-            raise ValueError(f"Unsupported type '{v}'. Must be one of {allowed}")
+            raise ValueError(
+                f"Unsupported type '{v}'. Must be one of {allowed}"
+            )
         return v
 
 
 class FunctionDefinition(BaseModel):
-    """Represents a function definition with name, description, parameters and return type."""
+    """Represents a function definition with name, description,
+    parameters and return type.
+    """
 
     name: str
     description: str
@@ -51,7 +62,9 @@ class Prompt(BaseModel):
 
 
 class FunctionCall(BaseModel):
-    """Represents the result of a function call: prompt, chosen function and its parameters."""
+    """Represents the result of a function call: prompt, chosen function
+    and its parameters.
+    """
 
     prompt: str
     name: str

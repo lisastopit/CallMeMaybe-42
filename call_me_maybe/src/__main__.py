@@ -1,7 +1,8 @@
 """Main entry point for the function calling tool.
 
 Usage:
-    uv run python -m src [--functions_definition <path>] [--input <path>] [--output <path>]
+    uv run python -m src [--functions_definition <path>]
+        [--input <path>] [--output <path>]
 """
 
 import argparse
@@ -10,7 +11,11 @@ from typing import List
 
 from .function_caller import FunctionCaller
 from .io_handler import load_function_definitions, load_prompts, save_results
-from .models import FunctionCall, FunctionDefinition, Prompt
+from .models import (
+    FunctionCall,
+    FunctionDefinition,
+    Prompt,
+)
 from .vocabulary import Vocabulary
 
 DEFAULT_FUNCTIONS_DEFINITION = "data/input/functions_definition.json"
@@ -25,25 +30,37 @@ def parse_args() -> argparse.Namespace:
         Parsed argument namespace.
     """
     parser = argparse.ArgumentParser(
-        description="Function calling tool using constrained decoding with LLMs."
+        description=(
+            "Function calling tool using constrained decoding "
+            "with LLMs."
+        )
     )
     parser.add_argument(
         "--functions_definition",
         type=str,
         default=DEFAULT_FUNCTIONS_DEFINITION,
-        help=f"Path to function definitions JSON (default: {DEFAULT_FUNCTIONS_DEFINITION})",
+        help=(
+            f"Path to function definitions JSON "
+            f"(default: {DEFAULT_FUNCTIONS_DEFINITION})"
+        ),
     )
     parser.add_argument(
         "--input",
         type=str,
         default=DEFAULT_INPUT,
-        help=f"Path to input prompts JSON (default: {DEFAULT_INPUT})",
+        help=(
+            f"Path to input prompts JSON "
+            f"(default: {DEFAULT_INPUT})"
+        ),
     )
     parser.add_argument(
         "--output",
         type=str,
         default=DEFAULT_OUTPUT,
-        help=f"Path for output JSON results (default: {DEFAULT_OUTPUT})",
+        help=(
+            f"Path for output JSON results "
+            f"(default: {DEFAULT_OUTPUT})"
+        ),
     )
     return parser.parse_args()
 
@@ -61,7 +78,10 @@ def main() -> int:
     print("=" * 60)
 
     # ---- Load function definitions ----
-    print(f"\n[1/4] Loading function definitions from '{args.functions_definition}'...")
+    print(
+        f"\n[1/4] Loading function definitions from "
+        f"'{args.functions_definition}'..."
+    )
     functions: List[FunctionDefinition]
     try:
         functions = load_function_definitions(args.functions_definition)
@@ -76,7 +96,9 @@ def main() -> int:
         return 1
 
     # ---- Load input prompts ----
-    print(f"\n[2/4] Loading prompts from '{args.input}'...")
+    print(
+        f"\n[2/4] Loading prompts from '{args.input}'..."
+    )
     prompts: List[Prompt]
     try:
         prompts = load_prompts(args.input)
@@ -91,9 +113,12 @@ def main() -> int:
         return 0
 
     # ---- Load model and vocabulary ----
-    print("\n[3/4] Initializing LLM model and vocabulary...")
+    print(
+        "\n[3/4] Initializing LLM model and vocabulary..."
+    )
     try:
         from llm_sdk import Small_LLM_Model
+
         print("  Loading LLM model (Qwen/Qwen3-0.6B)...")
         model = Small_LLM_Model()
         print("  Model loaded successfully.")
@@ -102,23 +127,31 @@ def main() -> int:
         vocab = Vocabulary(vocab_path)
         print(f"  Vocabulary loaded: {len(vocab.token_to_id)} tokens.")
     except Exception as e:
-        print(f"  [ERROR] Failed to initialize model/vocabulary: {e}", file=sys.stderr)
+        print(
+            f"  [ERROR] Failed to initialize model/vocabulary: {e}",
+            file=sys.stderr,
+        )
         return 1
 
     # ---- Process prompts ----
-    print(f"\n[4/4] Processing {len(prompts)} prompt(s)...")
+    print(
+        f"\n[4/4] Processing {len(prompts)} prompt(s)..."
+    )
     caller = FunctionCaller(model, vocab)
     results: List[FunctionCall] = caller.process_all(prompts, functions)
 
     # ---- Save results ----
-    print(f"\n[Done] Saving results to '{args.output}'...")
+    print(f"[Done] Saving results to '{args.output}'...")
     try:
         save_results(results, args.output)
     except OSError as e:
         print(f"  [ERROR] Failed to save results: {e}", file=sys.stderr)
         return 1
 
-    print(f"\n  Successfully processed {len(results)}/{len(prompts)} prompts.")
+    print(
+        f"\n  Successfully processed {len(results)}/{len(prompts)} "
+        "prompts."
+    )
     print("=" * 60)
     return 0
 
